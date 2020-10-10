@@ -112,10 +112,10 @@ scheduler = {'when': '', 'steps': ''}
 startIndex = input.find("when");
 contents = input[startIndex:].split("\"")
 whenStr = contents[1]
-scheduler['when'] = whenStr.replace(" ", "")
-stepsStr = contents[2][(contents[2].find("[")+1):(contents[2].find("]"))]
-scheduler['steps'] = stepsStr.replace(" ", "") #remove all white space
-#print(scheduler)
+scheduler['when'] = whenStr
+stepsStr = contents[2][(contents[2].find("[")+2):(contents[2].find("]")-1)]
+scheduler['steps'] = stepsStr.split(" ")
+# print(scheduler)
 
 
 # Obtain information of steps
@@ -136,12 +136,39 @@ for step in steps:
 
 
 orders = scheduler['steps']
-curSchedule = scheduler['when']
+curSchedule = scheduler['when'].split(" ")
 minuteCode = curSchedule[0]
 hourCode = curSchedule[1]
 dayOfWeekCode = curSchedule[2]
-if (hourCode == '*' and dayOfWeekCode == '*'):
-    schedule.every(1).minutes.do(job)
+
+
+if (minuteCode != '*' and hourCode == '*' and dayOfWeekCode == '*'):
+    schedule.every(int(minuteCode)).minutes.do(job)
+elif (dayOfWeekCode == '*'):
+    min = 0
+    if (minuteCode != '*'):
+        min = minuteCode
+    hour = 0
+    if (hourCode != '*'):
+        hour = hourCode
+    schedule.every().day.at(hour + ":" + min).do(job)
+elif (minuteCode != '*' and hourCode != '*' and dayOfWeekCode != '*'):
+    #(0 - 6) (Sunday to Saturday;
+    if int(dayOfWeekCode) == 0:
+        schedule.every().sunday.at(hourCode + ":" + minuteCode).do(job)
+    if int(dayOfWeekCode) == 1:
+        schedule.every().monday.at(hourCode + ":" + minuteCode).do(job)
+    if int(dayOfWeekCode) == 2:
+        schedule.every().tuesday.at(hourCode + ":" + minuteCode).do(job)
+    if int(dayOfWeekCode) == 3:
+        schedule.every().wednesday.at(hourCode + ":" + minuteCode).do(job)
+    if int(dayOfWeekCode) == 4:
+        schedule.every().thursday.at(hourCode + ":" + minuteCode).do(job)
+    if int(dayOfWeekCode) == 5:
+        schedule.every().friday.at(hourCode + ":" + minuteCode).do(job)
+    if int(dayOfWeekCode) == 6:
+        schedule.every().saturday.at(hourCode + ":" + minuteCode).do(job)
+
 while True:
     schedule.run_pending()
     time.sleep(1)
